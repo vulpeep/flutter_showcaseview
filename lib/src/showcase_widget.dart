@@ -70,6 +70,9 @@ class ShowCaseWidget extends StatefulWidget {
   /// Provides time duration for auto scrolling when [enableAutoScroll] is true
   final Duration scrollDuration;
 
+  /// TODO: add description
+  final double autoScrollAlignment;
+
   /// Default overlay blur used by showcase. if [Showcase.blurValue]
   /// is not provided.
   ///
@@ -98,6 +101,7 @@ class ShowCaseWidget extends StatefulWidget {
     this.enableAutoScroll = false,
     this.disableBarrierInteraction = false,
     this.enableShowcase = true,
+    this.autoScrollAlignment = 0.5,
   });
 
   static GlobalKey? activeTargetWidget(BuildContext context) {

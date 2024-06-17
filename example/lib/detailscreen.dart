@@ -49,16 +49,18 @@ class _DetailState extends State<Detail> {
                   key: _one,
                   title: 'Title',
                   description: 'Desc',
-                  child: InkWell(
-                    onTap: () {},
-                    child: const Text(
-                      'Flutter Notification',
-                      style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.w600,
+                  child: (index) {
+                    return InkWell(
+                      onTap: () {},
+                      child: const Text(
+                        'Flutter Notification',
+                        style: TextStyle(
+                          fontSize: 25,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
                 const SizedBox(
                   height: 16,

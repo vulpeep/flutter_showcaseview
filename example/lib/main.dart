@@ -180,14 +180,17 @@ class _MailPageState extends State<MailPage> {
                                       description: 'Tap to see menu options',
                                       onBarrierClick: () =>
                                           debugPrint('Barrier clicked'),
-                                      child: GestureDetector(
-                                        onTap: () =>
-                                            debugPrint('menu button clicked'),
-                                        child: Icon(
-                                          Icons.menu,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                      ),
+                                      child: (index) {
+                                        return GestureDetector(
+                                          onTap: () =>
+                                              debugPrint('menu button clicked'),
+                                          child: Icon(
+                                            Icons.menu,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
+                                        );
+                                      },
                                     ),
                                     const SizedBox(
                                       width: 10,
@@ -214,7 +217,7 @@ class _MailPageState extends State<MailPage> {
                       ),
                     ),
                     Showcase(
-                      targetPadding: const EdgeInsets.all(5),
+                      targetMargin: const EdgeInsets.all(5),
                       key: _two,
                       title: 'Profile',
                       description:
@@ -222,16 +225,18 @@ class _MailPageState extends State<MailPage> {
                       tooltipBackgroundColor: Theme.of(context).primaryColor,
                       textColor: Colors.white,
                       targetShapeBorder: const CircleBorder(),
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        width: 45,
-                        height: 45,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        child: Image.asset('assets/simform.png'),
-                      ),
+                      child: (index) {
+                        return Container(
+                          padding: const EdgeInsets.all(5),
+                          width: 45,
+                          height: 45,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Theme.of(context).primaryColor,
+                          ),
+                          child: Image.asset('assets/simform.png'),
+                        );
+                      },
                     ),
                     const SizedBox(
                       width: 12,
@@ -277,22 +282,24 @@ class _MailPageState extends State<MailPage> {
         title: 'Compose Mail',
         description: 'Click here to compose mail',
         targetShapeBorder: const CircleBorder(),
-        child: FloatingActionButton(
-          backgroundColor: Theme.of(context).primaryColor,
-          onPressed: () {
-            setState(() {
-              /* reset ListView to ensure that the showcased widgets are
+        child: (index) {
+          return FloatingActionButton(
+            backgroundColor: Theme.of(context).primaryColor,
+            onPressed: () {
+              setState(() {
+                /* reset ListView to ensure that the showcased widgets are
                * currently rendered so the showcased keys are available in the
                * render tree. */
-              scrollController.jumpTo(0);
-              ShowCaseWidget.of(context)
-                  .startShowCase([_one, _two, _three, _four, _five]);
-            });
-          },
-          child: const Icon(
-            Icons.add,
-          ),
-        ),
+                scrollController.jumpTo(0);
+                ShowCaseWidget.of(context)
+                    .startShowCase([_one, _two, _three, _four, _five]);
+              });
+            },
+            child: const Icon(
+              Icons.add,
+            ),
+          );
+        },
       ),
     );
   }
@@ -327,11 +334,13 @@ class _MailPageState extends State<MailPage> {
                 });
               });
             },
-            child: MailTile(
-              mail: mail,
-              showCaseKey: _four,
-              showCaseDetail: showCaseDetail,
-            )),
+            child: (index) {
+              return MailTile(
+                mail: mail,
+                showCaseKey: _four,
+                showCaseDetail: showCaseDetail,
+              );
+            }),
       ),
     );
   }
@@ -446,7 +455,9 @@ class MailTile extends StatelessWidget {
                         )
                       ],
                     ),
-                    child: const SAvatarExampleChild(),
+                    child: (index) {
+                      return const SAvatarExampleChild();
+                    },
                   )
                 else
                   const SAvatarExampleChild(),

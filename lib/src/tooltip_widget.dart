@@ -125,13 +125,9 @@ class _ToolTipWidgetState extends State<ToolTipWidget>
         position.dy + ((widget.position?.getHeight() ?? 0) / 2);
     final topPosition = position.dy - ((widget.position?.getHeight() ?? 0) / 2);
     final hasSpaceInTop = topPosition >= height;
-    // TODO: need to update for flutter version > 3.8.X
-    // ignore: deprecated_member_use
-    final EdgeInsets viewInsets = EdgeInsets.fromWindowPadding(
-      // ignore: deprecated_member_use
-      WidgetsBinding.instance.window.viewInsets,
-      // ignore: deprecated_member_use
-      WidgetsBinding.instance.window.devicePixelRatio,
+    final EdgeInsets viewInsets = EdgeInsets.fromViewPadding(
+      View.of(context).viewInsets,
+      View.of(context).devicePixelRatio,
     );
     final double actualVisibleScreenHeight =
         widget.screenSize.height - viewInsets.bottom;
