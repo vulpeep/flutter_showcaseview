@@ -44,7 +44,9 @@ class GetPosition {
   Offset? _boxOffset;
 
   void _getRenderBoxOffset() {
-    if (renderBox == null) return;
+    if (renderBox == null || !renderBox!.attached || !renderBox!.hasSize) {
+      return;
+    }
 
     _boxOffset = renderBox?.localToGlobal(
       Offset.zero,

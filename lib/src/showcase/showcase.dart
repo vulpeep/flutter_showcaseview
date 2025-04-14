@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../constants.dart';
@@ -94,6 +96,8 @@ class Showcase extends StatefulWidget {
   /// Custom tooltip widget when [Showcase.withWidget] is used.
   final Widget? container;
 
+  final Widget? arrow;
+
   /// Custom static floating action widget to show a static widget anywhere
   /// on the screen
   final FloatingActionWidget? floatingActionWidget;
@@ -160,6 +164,8 @@ class Showcase extends StatefulWidget {
   ///
   /// Default to [EdgeInsets.zero]
   final EdgeInsets targetPadding;
+
+  final ImageFilter? targetBackdropFilter;
 
   /// Triggered when target has been double tapped
   final VoidCallback? onTargetDoubleTap;
@@ -393,6 +399,7 @@ class Showcase extends StatefulWidget {
         const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
     this.onToolTipClick,
     this.targetPadding = EdgeInsets.zero,
+    this.targetBackdropFilter,
     this.blurValue,
     this.targetBorderRadius,
     this.onTargetLongPress,
@@ -419,6 +426,7 @@ class Showcase extends StatefulWidget {
   })  : height = null,
         width = null,
         container = null,
+        arrow = null,
         showcaseKey = key,
         assert(
           overlayOpacity >= 0.0 && overlayOpacity <= 1.0,
@@ -512,14 +520,16 @@ class Showcase extends StatefulWidget {
     this.disableDefaultTargetGestures = false,
     this.tooltipPosition,
     this.onBarrierClick,
+    this.targetBackdropFilter,
     this.disableBarrierInteraction = false,
     this.toolTipSlideEndDistance = 7,
     this.tooltipActions,
     this.tooltipActionConfig,
     this.scrollAlignment = 0.5,
     this.enableAutoScroll,
-  })  : showArrow = false,
-        onToolTipClick = null,
+    this.arrow,
+    this.showArrow = false,
+  })  : onToolTipClick = null,
         scaleAnimationDuration = const Duration(milliseconds: 300),
         scaleAnimationCurve = Curves.decelerate,
         scaleAnimationAlignment = null,

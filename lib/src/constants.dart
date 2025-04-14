@@ -6,8 +6,8 @@ class Constants {
   Constants._();
 
   /// Arrow dimensions
-  static const double arrowWidth = 18;
-  static const double arrowHeight = 9;
+  static const double arrowWidth = 64;
+  static const double arrowHeight = 46;
 
   static const double arrowStrokeWidth = 10;
 
@@ -18,7 +18,7 @@ class Constants {
   static const double withOutArrowToolTipPadding = 0;
 
   /// Distance between target and tooltip
-  static const double tooltipOffset = 10;
+  static const double tooltipOffset = 32;
 
   /// Minimum tooltip dimensions to maintain usability
   static const double minimumToolTipWidth = 50;

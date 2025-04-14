@@ -35,6 +35,7 @@ class ToolTipWidget extends StatefulWidget {
     this.descriptionPadding,
     this.titleTextDirection,
     this.descriptionTextDirection,
+    this.arrow,
   });
 
   final String? title;
@@ -46,6 +47,7 @@ class ToolTipWidget extends StatefulWidget {
   final TextStyle? titleTextStyle;
   final TextStyle? descTextStyle;
   final Widget? container;
+  final Widget? arrow;
   final Color? tooltipBackgroundColor;
   final Color? textColor;
   final bool showArrow;
@@ -126,7 +128,7 @@ class _ToolTipWidgetState extends State<ToolTipWidget>
     final box = widget.showcaseController.position?.renderBox;
     // This is a workaround to avoid the error when the widget is not mounted
     // but won't happen in general cases
-    if (box == null) {
+    if (box == null || !box.attached) {
       return const SizedBox.shrink();
     }
     final targetPosition = box.localToGlobal(Offset.zero);
@@ -248,9 +250,11 @@ class _ToolTipWidgetState extends State<ToolTipWidget>
         gapBetweenContentAndAction:
             widget.tooltipActionConfig.gapBetweenContentAndAction,
         screenEdgePadding: widget.toolTipMargin,
-        showcaseOffset: widget.showcaseController.rootRenderObject
-                ?.localToGlobal(Offset.zero) ??
-            Offset.zero,
+        showcaseOffset:
+            widget.showcaseController.rootRenderObject?.attached == true
+                ? widget.showcaseController.rootRenderObject!
+                    .localToGlobal(Offset.zero)
+                : Offset.zero,
         children: [
           _TooltipLayoutId(
             id: TooltipLayoutSlot.tooltipBox,
@@ -273,15 +277,16 @@ class _ToolTipWidgetState extends State<ToolTipWidget>
           if (widget.showArrow)
             _TooltipLayoutId(
               id: TooltipLayoutSlot.arrow,
-              child: CustomPaint(
-                painter: _Arrow(
-                  strokeColor: widget.tooltipBackgroundColor!,
-                ),
-                size: const Size(
-                  Constants.arrowWidth,
-                  Constants.arrowHeight,
-                ),
-              ),
+              child: widget.arrow ??
+                  CustomPaint(
+                    painter: _Arrow(
+                      strokeColor: widget.tooltipBackgroundColor!,
+                    ),
+                    size: const Size(
+                      Constants.arrowWidth,
+                      Constants.arrowHeight,
+                    ),
+                  ),
             ),
         ],
       ),

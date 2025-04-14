@@ -187,7 +187,11 @@ class ShowCaseWidget extends StatefulWidget {
   ShowCaseWidgetState createState() => ShowCaseWidgetState();
 }
 
-class ShowCaseWidgetState extends State<ShowCaseWidget> {
+class ShowCaseWidgetState extends State<ShowCaseWidget>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _areaAnimationController;
+  RectTween? _areaTween;
+
   List<GlobalKey>? ids;
   int? activeWidgetId;
   RenderBox? rootRenderObject;
@@ -248,6 +252,19 @@ class ShowCaseWidgetState extends State<ShowCaseWidget> {
     }
   }
 
+  /// Returns current active showcase key
+  GlobalKey? get getNextActiveShowcaseKey {
+    if (ids == null || activeWidgetId == null) return null;
+
+    final nextIndex = activeWidgetId! + 1;
+
+    if (nextIndex < ids!.length && nextIndex >= 0) {
+      return ids![nextIndex];
+    } else {
+      return null;
+    }
+  }
+
   bool get isShowcaseRunning => getCurrentActiveShowcaseKey != null;
 
   Timer? _timer;
@@ -270,12 +287,22 @@ class ShowCaseWidgetState extends State<ShowCaseWidget> {
         <ShowcaseController>[];
   }
 
+  List<ShowcaseController> get _getNextActiveControllers {
+    return _showcaseControllers[getNextActiveShowcaseKey]?.values.toList() ??
+        <ShowcaseController>[];
+  }
+
   @override
   void initState() {
     super.initState();
     globalTooltipActions = widget.globalTooltipActions;
     globalTooltipActionConfig = widget.globalTooltipActionConfig;
-    _initRootWidget();
+    initRootWidget();
+
+    _areaAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    )..addListener(() => setState(() {}));
   }
 
   @override
@@ -292,6 +319,12 @@ class ShowCaseWidgetState extends State<ShowCaseWidget> {
   }
 
   @override
+  void dispose() {
+    _areaAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return OverlayBuilder(
       updateOverlay: (updateOverlays) => updateOverlay = updateOverlays,
@@ -303,6 +336,7 @@ class ShowCaseWidgetState extends State<ShowCaseWidget> {
         }
 
         final controllerLength = controller.length;
+
         for (var i = 0; i < controllerLength; i++) {
           controller[i].updateControllerData();
         }
@@ -319,17 +353,24 @@ class ShowCaseWidgetState extends State<ShowCaseWidget> {
           child: const Align(),
         );
 
+        final animatedRect = _areaTween?.evaluate(_areaAnimationController) ??
+            _getCurrentActiveControllers.first.linkedShowcaseDataModel?.rect ??
+            Rect.zero;
+
         return Stack(
           children: [
             GestureDetector(
               onTap: () => _barrierOnTap(firstShowcaseConfig),
               child: ClipPath(
                 clipper: RRectClipper(
-                  area: Rect.zero,
+                  area: animatedRect,
                   isCircle: false,
                   radius: BorderRadius.zero,
                   overlayPadding: EdgeInsets.zero,
-                  linkedObjectData: _getLinkedShowcasesData(controller),
+                  linkedObjectData: _getLinkedShowcasesData(
+                    controller,
+                    animatedRect,
+                  ),
                 ),
                 child: firstController.blur == 0
                     ? backgroundContainer
@@ -348,6 +389,55 @@ class ShowCaseWidgetState extends State<ShowCaseWidget> {
       },
       child: Builder(builder: widget.builder),
     );
+  }
+
+  List<LinkedShowcaseDataModel> _getLinkedShowcasesData(
+    List<ShowcaseController> controllers,
+    Rect rect,
+  ) {
+    final controllerLength = controllers.length;
+    return [
+      for (var i = 0; i < controllerLength; i++)
+        if (controllers[i].linkedShowcaseDataModel != null)
+          LinkedShowcaseDataModel(
+            rect: rect,
+            radius: controllers[i].linkedShowcaseDataModel!.radius,
+            overlayPadding:
+                controllers[i].linkedShowcaseDataModel!.overlayPadding,
+            isCircle: controllers[i].linkedShowcaseDataModel!.isCircle,
+          ),
+    ];
+  }
+
+  void _updateRootWidget() {
+    if (!mounted) return;
+    final rootWidget = context.findRootAncestorStateOfType<State<Overlay>>();
+    rootRenderObject = rootWidget?.context.findRenderObject() as RenderBox?;
+    rootWidgetSize = rootWidget == null ||
+            rootRenderObject?.attached != true ||
+            rootRenderObject?.hasSize != true
+        ? MediaQuery.of(context).size
+        : rootRenderObject?.size;
+  }
+
+  void _barrierOnTap(Showcase firstShowcaseConfig) {
+    firstShowcaseConfig.onBarrierClick?.call();
+    if (disableBarrierInteraction ||
+        firstShowcaseConfig.disableBarrierInteraction) {
+      return;
+    }
+    next();
+  }
+
+  void initRootWidget() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final rootWidget = context.findRootAncestorStateOfType<State<Overlay>>();
+      rootRenderObject = rootWidget?.context.findRenderObject() as RenderBox?;
+      rootWidgetSize = rootWidget == null
+          ? MediaQuery.of(context).size
+          : rootRenderObject?.size;
+    });
   }
 
   /// Starts Showcase view from the beginning of specified list of widget ids.
@@ -417,21 +507,49 @@ class ShowCaseWidgetState extends State<ShowCaseWidget> {
       return;
     }
 
-    /// We are using [.then] to maintain older functionality.
-    /// here [_onComplete] method waits for animation to complete so we need
-    /// to wait before moving to next showcase
-    _onComplete().then(
-      (_) {
-        if (!mounted) return;
-        activeWidgetId = activeWidgetId! + 1;
-        _onStart();
-        if (activeWidgetId! >= ids!.length) {
-          _cleanupAfterSteps();
-          widget.onFinish?.call();
-        }
-        updateOverlay?.call(isShowcaseRunning);
-      },
-    );
+    if (ids != null && mounted) {
+      final nextIndex = activeWidgetId! + 1;
+
+      final oldRect = _getCurrentActiveControllers.isEmpty
+          ? null
+          : _getCurrentActiveControllers.first.linkedShowcaseDataModel?.rect;
+      final newRect = _getNextActiveControllers.isEmpty
+          ? null
+          : _getNextActiveControllers.first.linkedShowcaseDataModel?.rect;
+
+      if (nextIndex >= ids!.length ||
+          oldRect == null ||
+          newRect == null ||
+          true) {
+        /// We are using [.then] to maintain older functionality.
+        /// here [_onComplete] method waits for animation to complete so we need
+        /// to wait before moving to next showcase
+        _onComplete().then(
+          (_) {
+            if (!mounted) return;
+            activeWidgetId = activeWidgetId! + 1;
+            _onStart();
+            if (activeWidgetId! >= ids!.length) {
+              _cleanupAfterSteps();
+              widget.onFinish?.call();
+            }
+            updateOverlay?.call(isShowcaseRunning);
+          },
+        );
+        return;
+      }
+
+      _areaTween = RectTween(begin: oldRect, end: newRect);
+      _areaAnimationController.forward(from: 0);
+      _areaAnimationController.forward().then((_) {
+        _onComplete().then((_) {
+          if (!mounted) return;
+          activeWidgetId = nextIndex;
+          _onStart();
+          updateOverlay?.call(isShowcaseRunning);
+        });
+      });
+    }
   }
 
   /// Completes current active showcase and starts previous one
@@ -514,46 +632,6 @@ class ShowCaseWidgetState extends State<ShowCaseWidget> {
       'registerShowcaseController',
     );
     return _showcaseControllers[key]![showcaseId]!;
-  }
-
-  List<LinkedShowcaseDataModel> _getLinkedShowcasesData(
-    List<ShowcaseController> controllers,
-  ) {
-    final controllerLength = controllers.length;
-    return [
-      for (var i = 0; i < controllerLength; i++)
-        if (controllers[i].linkedShowcaseDataModel != null)
-          controllers[i].linkedShowcaseDataModel!,
-    ];
-  }
-
-  void _updateRootWidget() {
-    if (!mounted) return;
-    final rootWidget = context.findRootAncestorStateOfType<State<Overlay>>();
-    rootRenderObject = rootWidget?.context.findRenderObject() as RenderBox?;
-    rootWidgetSize = rootWidget == null
-        ? MediaQuery.of(context).size
-        : rootRenderObject?.size;
-  }
-
-  void _barrierOnTap(Showcase firstShowcaseConfig) {
-    firstShowcaseConfig.onBarrierClick?.call();
-    if (disableBarrierInteraction ||
-        firstShowcaseConfig.disableBarrierInteraction) {
-      return;
-    }
-    next();
-  }
-
-  void _initRootWidget() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final rootWidget = context.findRootAncestorStateOfType<State<Overlay>>();
-      rootRenderObject = rootWidget?.context.findRenderObject() as RenderBox?;
-      rootWidgetSize = rootWidget == null
-          ? MediaQuery.of(context).size
-          : rootRenderObject?.size;
-    });
   }
 
   Future<void> _onStart() async {

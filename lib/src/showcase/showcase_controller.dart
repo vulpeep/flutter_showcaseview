@@ -118,7 +118,9 @@ class ShowcaseController {
       if (!context.mounted) return;
       final rootWidget = context.findRootAncestorStateOfType<State<Overlay>>();
       rootRenderObject = rootWidget?.context.findRenderObject() as RenderBox?;
-      rootWidgetSize = rootWidget == null
+      rootWidgetSize = rootWidget == null ||
+              rootRenderObject?.attached != true ||
+              rootRenderObject?.hasSize != true
           ? MediaQuery.of(context).size
           : rootRenderObject?.size;
       if (!showCaseWidgetState.enableShowcase) return;
@@ -201,6 +203,7 @@ class ShowcaseController {
               shapeBorder: config.targetShapeBorder,
               disableDefaultChildGestures: config.disableDefaultTargetGestures,
               targetPadding: config.targetPadding,
+              backdropFilter: config.targetBackdropFilter,
             ),
             ToolTipWidget(
               key: ValueKey(id),
@@ -213,6 +216,7 @@ class ShowcaseController {
               titleTextStyle: config.titleTextStyle,
               descTextStyle: config.descTextStyle,
               container: config.container,
+              arrow: config.arrow,
               tooltipBackgroundColor: config.tooltipBackgroundColor,
               textColor: config.textColor,
               showArrow: config.showArrow,

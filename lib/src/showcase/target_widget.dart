@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 /// A widget that represents the target of a showcase.
@@ -13,11 +15,10 @@ class TargetWidget extends StatelessWidget {
   ///
   /// * [offset] - The position of the target widget in the overlay
   /// * [size] - The size of the target widget
-  /// * [shapeBorder] - The shape of the target highlight (e.g., circle)
+  /// * [shape] - The shape of the target highlight (e.g., circle)
   /// * [targetPadding] - Padding applied around the target to increase its
   /// highlight area
   /// * [onTap] - Callback when the target is tapped
-  /// * [radius] - Border radius when using a rectangular shape
   /// * [onDoubleTap] - Callback when the target is double-tapped
   /// * [onLongPress] - Callback when the target is long-pressed
   /// * [disableDefaultChildGestures] - Whether to disable gesture detection
@@ -32,6 +33,7 @@ class TargetWidget extends StatelessWidget {
     this.onDoubleTap,
     this.onLongPress,
     this.disableDefaultChildGestures = false,
+    this.backdropFilter,
   });
 
   /// The position of the target widget in the overlay coordinates
@@ -70,26 +72,40 @@ class TargetWidget extends StatelessWidget {
   /// This creates some space between the actual widget and its highlight border
   final EdgeInsets targetPadding;
 
+  final ImageFilter? backdropFilter;
+
   @override
   Widget build(BuildContext context) {
     /// Creates the content of the target widget
     ///
     /// This includes the gesture detector and the container with the appropriate
     /// shape decoration that defines the target's visual appearance.
+
+    final container = Container(
+      height: size.height.abs() + targetPadding.vertical,
+      width: size.width.abs() + targetPadding.horizontal,
+      padding: targetPadding,
+      decoration: ShapeDecoration(
+        // color: targetColor,
+        color: Colors.transparent,
+        shape: radius == null
+            ? shapeBorder
+            : RoundedRectangleBorder(borderRadius: radius!),
+      ),
+    );
     final targetWidgetContent = GestureDetector(
       onTap: onTap,
       onLongPress: onLongPress,
       onDoubleTap: onDoubleTap,
       behavior: HitTestBehavior.translucent,
-      child: Container(
-        height: size.height.abs(),
-        width: size.width.abs(),
-        margin: targetPadding,
-        decoration: ShapeDecoration(
-          shape: radius == null
-              ? shapeBorder
-              : RoundedRectangleBorder(borderRadius: radius!),
-        ),
+      child: ClipRRect(
+        borderRadius: radius ?? BorderRadius.zero,
+        child: backdropFilter == null
+            ? container
+            : BackdropFilter(
+                filter: backdropFilter!,
+                child: container,
+              ),
       ),
     );
     return Positioned(
