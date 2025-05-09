@@ -81,6 +81,13 @@ class TargetWidget extends StatelessWidget {
     /// This includes the gesture detector and the container with the appropriate
     /// shape decoration that defines the target's visual appearance.
 
+    final computedRadius = radius ??
+        (shapeBorder is RoundedRectangleBorder
+            ? (shapeBorder as RoundedRectangleBorder)
+                .borderRadius
+                .resolve(Directionality.of(context))
+            : BorderRadius.zero);
+
     final container = Container(
       height: size.height.abs() + targetPadding.vertical,
       width: size.width.abs() + targetPadding.horizontal,
@@ -99,7 +106,7 @@ class TargetWidget extends StatelessWidget {
       onDoubleTap: onDoubleTap,
       behavior: HitTestBehavior.translucent,
       child: ClipRRect(
-        borderRadius: radius ?? BorderRadius.zero,
+        borderRadius: computedRadius,
         child: backdropFilter == null
             ? container
             : BackdropFilter(

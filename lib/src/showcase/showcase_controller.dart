@@ -154,9 +154,17 @@ class ShowcaseController {
 
     position = newPosition;
     final rect = newPosition.getRect();
+
+    final radius = config.targetBorderRadius ??
+        (config.targetShapeBorder is RoundedRectangleBorder
+            ? (config.targetShapeBorder as RoundedRectangleBorder)
+                .borderRadius
+                .resolve(Directionality.of(_context))
+            : BorderRadius.zero);
+
     linkedShowcaseDataModel = LinkedShowcaseDataModel(
       rect: isScrollRunning ? Rect.zero : rect,
-      radius: config.targetBorderRadius,
+      radius: radius,
       overlayPadding: isScrollRunning ? EdgeInsets.zero : config.targetPadding,
       isCircle: config.targetShapeBorder is CircleBorder,
     );

@@ -357,6 +357,14 @@ class ShowCaseWidgetState extends State<ShowCaseWidget>
             _getCurrentActiveControllers.first.linkedShowcaseDataModel?.rect ??
             Rect.zero;
 
+        final radius = firstShowcaseConfig.targetBorderRadius ??
+            (firstShowcaseConfig.targetShapeBorder is RoundedRectangleBorder
+                ? (firstShowcaseConfig.targetShapeBorder
+                        as RoundedRectangleBorder)
+                    .borderRadius
+                    .resolve(Directionality.of(context))
+                : BorderRadius.zero);
+
         return Stack(
           children: [
             GestureDetector(
@@ -365,7 +373,7 @@ class ShowCaseWidgetState extends State<ShowCaseWidget>
                 clipper: RRectClipper(
                   area: animatedRect,
                   isCircle: false,
-                  radius: BorderRadius.zero,
+                  radius: radius,
                   overlayPadding: EdgeInsets.zero,
                   linkedObjectData: _getLinkedShowcasesData(
                     controller,
