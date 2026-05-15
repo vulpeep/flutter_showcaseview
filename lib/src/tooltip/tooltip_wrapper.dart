@@ -73,6 +73,7 @@ class ToolTipWrapper extends StatefulWidget {
     this.descriptionPadding,
     this.titleTextDirection,
     this.descriptionTextDirection,
+    this.arrow,
     super.key,
   });
 
@@ -85,6 +86,7 @@ class ToolTipWrapper extends StatefulWidget {
   final TextStyle? titleTextStyle;
   final TextStyle? descTextStyle;
   final Widget? container;
+  final Widget? arrow;
   final Color tooltipBackgroundColor;
   final Color textColor;
   final bool showArrow;
@@ -278,9 +280,10 @@ class _ToolTipWrapperState extends State<ToolTipWrapper>
             _TooltipLayoutId(
               id: TooltipLayoutSlot.arrow,
               key: UniqueKey(),
-              child: ShowcaseArrow(
-                strokeColor: widget.tooltipBackgroundColor,
-              ),
+              child: widget.arrow ??
+                  ShowcaseArrow(
+                    strokeColor: widget.tooltipBackgroundColor,
+                  ),
             ),
         ],
       ),

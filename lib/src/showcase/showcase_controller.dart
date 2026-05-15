@@ -311,6 +311,7 @@ class ShowcaseController {
               shapeBorder: config.targetShapeBorder,
               disableDefaultChildGestures: config.disableDefaultTargetGestures,
               targetPadding: config.targetPadding,
+              backdropFilter: config.targetBackdropFilter,
             ),
             ToolTipWrapper(
               title: config.title,
@@ -322,6 +323,7 @@ class ShowcaseController {
               titleTextStyle: config.titleTextStyle,
               descTextStyle: config.descTextStyle,
               container: config.container,
+              arrow: config.arrow,
               tooltipBackgroundColor: config.tooltipBackgroundColor,
               textColor: config.textColor,
               showArrow: config.showArrow,

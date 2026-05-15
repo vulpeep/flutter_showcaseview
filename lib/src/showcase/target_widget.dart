@@ -19,6 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 class TargetWidget extends StatelessWidget {
@@ -40,6 +42,7 @@ class TargetWidget extends StatelessWidget {
     this.onDoubleTap,
     this.onLongPress,
     this.disableDefaultChildGestures = false,
+    this.backdropFilter,
     super.key,
   });
 
@@ -73,22 +76,43 @@ class TargetWidget extends StatelessWidget {
   /// Padding applied around the target to increase its highlight area.
   final EdgeInsets targetPadding;
 
+  /// Optional backdrop filter applied inside the highlighted target area.
+  final ImageFilter? backdropFilter;
+
   @override
   Widget build(BuildContext context) {
+    final computedRadius = radius ??
+        (shapeBorder is RoundedRectangleBorder
+            ? (shapeBorder as RoundedRectangleBorder)
+                .borderRadius
+                .resolve(Directionality.of(context))
+            : BorderRadius.zero);
+
+    final container = Container(
+      height: size.height.abs() + targetPadding.vertical,
+      width: size.width.abs() + targetPadding.horizontal,
+      padding: targetPadding,
+      decoration: ShapeDecoration(
+        color: Colors.transparent,
+        shape: radius == null
+            ? shapeBorder
+            : RoundedRectangleBorder(borderRadius: radius!),
+      ),
+    );
+
     final targetWidgetContent = GestureDetector(
       onTap: onTap,
       onLongPress: onLongPress,
       onDoubleTap: onDoubleTap,
       behavior: HitTestBehavior.translucent,
-      child: Container(
-        height: size.height.abs(),
-        width: size.width.abs(),
-        margin: targetPadding,
-        decoration: ShapeDecoration(
-          shape: radius == null
-              ? shapeBorder
-              : RoundedRectangleBorder(borderRadius: radius!),
-        ),
+      child: ClipRRect(
+        borderRadius: computedRadius,
+        child: backdropFilter == null
+            ? container
+            : BackdropFilter(
+                filter: backdropFilter!,
+                child: container,
+              ),
       ),
     );
     return Positioned(

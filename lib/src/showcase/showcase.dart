@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../models/showcase_scope.dart';
@@ -111,10 +113,12 @@ class Showcase extends StatefulWidget {
     this.scrollAlignment = 0.5,
     this.enableAutoScroll,
     this.floatingActionWidget,
-    this.targetTooltipGap = 10,
+    this.targetTooltipGap = 32,
+    this.targetBackdropFilter,
     this.onTargetRectUpdate,
     this.scope,
-  })  : container = null,
+  })  : arrow = null,
+        container = null,
         showcaseKey = key,
         assert(
           title != null || description != null,
@@ -202,7 +206,9 @@ class Showcase extends StatefulWidget {
     this.scrollAlignment = 0.5,
     this.enableAutoScroll,
     this.toolTipMargin = 14,
-    this.targetTooltipGap = 10,
+    this.targetTooltipGap = 32,
+    this.targetBackdropFilter,
+    this.arrow,
     this.onTargetRectUpdate,
     this.scope,
   })  : showArrow = false,
@@ -323,6 +329,12 @@ class Showcase extends StatefulWidget {
 
   /// Custom tooltip widget when [Showcase.withWidget] is used.
   final Widget? container;
+
+  /// Custom arrow widget to replace the default arrow painter.
+  final Widget? arrow;
+
+  /// Optional backdrop filter applied inside the highlighted target area.
+  final ImageFilter? targetBackdropFilter;
 
   /// Custom static floating action widget to show a static widget anywhere
   /// on the screen

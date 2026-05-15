@@ -27,8 +27,8 @@ class Constants {
   Constants._();
 
   /// Arrow dimensions
-  static const double arrowWidth = 18;
-  static const double arrowHeight = 9;
+  static const double arrowWidth = 64;
+  static const double arrowHeight = 46;
 
   static const double arrowStrokeWidth = 10;
 
